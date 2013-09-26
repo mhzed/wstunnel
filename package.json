@@ -23,6 +23,6 @@
   },
   "devDependencies": {},
   "bin": {
-    "wstunnel": "./bin/wst.js"
+    "wstunnel": "./bin/wstt.js"
   }
 }
