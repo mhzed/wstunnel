@@ -14,9 +14,10 @@ module.exports = class wst_client
     @tcpServer = net.createServer();
     @wsClient = new WebSocketClient();
 
-  # example:  start(8081, "ws.domain.com:454", "dst.domain.com:22")
+  # example:  start(8081, "wss://ws.domain.com:454", "dst.domain.com:22")
   # meaning: tunnel *:localport to remoteAddr by using websocket connection to wsHost
-  start: (localPort, wsHost, remoteAddr)->
+  # wsHostUrl:  ws:// denotes standard socket, wss:// denotes ssl socket
+  start: (localPort, wsHostUrl, remoteAddr)->
     @tcpServer.listen(localPort)
     @tcpServer.on("connection", (tcpConn)=>
       console.log("Connection detected");
@@ -30,7 +31,5 @@ module.exports = class wst_client
         bindSockets(wsConn, tcpConn);
       );
       #wsClient.connect('ws://localhost:8080/?dst=192.168.187.130:22', 'tunnel-protocol');
-      if not /^ws:/.test(wsHost) then wsHost = "ws://#{wsHost}"
-      console.log wsHost
-      @wsClient.connect("#{wsHost}/?dst=#{remoteAddr}", 'tunnel-protocol');
+      @wsClient.connect("#{wsHostUrl}/?dst=#{remoteAddr}", 'tunnel-protocol');
     )

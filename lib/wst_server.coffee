@@ -5,7 +5,9 @@ net = require("net");
 bindSockets = require "./bindSockets"
 
 module.exports = class wst_server
-  constructor: ()->
+  # if dstHost, dstPort are specified here, then all tunnel end points are at dstHost:dstPort, regardless what
+  # client requests, for security option
+  constructor: (@dstHost, @dstPort)->
     @httpServer = http.createServer (request, response) ->
         console.log((new Date()) + ' Received unhandled request for ' + request.url);
         response.writeHead(404);
@@ -27,8 +29,13 @@ module.exports = class wst_server
         if (!uri.query.dst)
           return @_reject(request,"No tunnel target specified");
 
-        remoteAddr = uri.query.dst
-        [host, port] = remoteAddr.split(":")
+        [host, port] = [@dstHost, @dstPort]
+        if host && port
+          remoteAddr = "#{host}:#{port}"
+        else
+          remoteAddr = uri.query.dst
+          [host, port] = remoteAddr.split(":")
+
         tcpconn = net.connect {
           port : port,
           host : host,
