@@ -19,7 +19,9 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "websocket": "1.0.8"
+    "websocket": "1.0.8",
+    "under_score": "0.1.0",
+    "optimist": "0.3.5"
   },
   "devDependencies": {},
   "bin": {
