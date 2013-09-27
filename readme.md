@@ -43,8 +43,8 @@ On server, run nginx (>=1.3.13) with sample configuration:
         server_name  mydomain.com;
 
         ssl  on;
-        ssl_certificate  /home/vdf_secret_bucket/code/vdf.ssl.bundle.crt;
-        ssl_certificate_key  /home/vdf_secret_bucket/code/vdf.ssl.nopass.key;
+        ssl_certificate  /path/to/my.crt
+        ssl_certificate_key  /path/to/my.key
         ssl_session_timeout  5m;
         ssl_protocols  SSLv2 SSLv3 TLSv1;
         ssl_ciphers  ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP;
