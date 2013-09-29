@@ -31,5 +31,6 @@ module.exports = class wst_client
         bindSockets(wsConn, tcpConn);
       );
       #wsClient.connect('ws://localhost:8080/?dst=192.168.187.130:22', 'tunnel-protocol');
-      @wsClient.connect("#{wsHostUrl}/?dst=#{remoteAddr}", 'tunnel-protocol');
+      if remoteAddr then url = "#{wsHostUrl}/?dst=#{remoteAddr}" else url = "#{wsHostUrl}"
+      @wsClient.connect(url, 'tunnel-protocol');
     )

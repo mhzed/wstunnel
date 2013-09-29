@@ -26,13 +26,13 @@ module.exports = class wst_server
           return @_reject(request, "Illegal origin " + origin);
 
         uri = url.parse(request.httpRequest.url, true);
-        if (!uri.query.dst)
-          return @_reject(request,"No tunnel target specified");
 
         [host, port] = [@dstHost, @dstPort]
         if host && port
           remoteAddr = "#{host}:#{port}"
         else
+          if (!uri.query.dst)
+            return @_reject(request,"No tunnel target specified");
           remoteAddr = uri.query.dst
           [host, port] = remoteAddr.split(":")
 

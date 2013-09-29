@@ -26,7 +26,11 @@
     client = new wst.client;
     wsHost = _.last(argv._);
     _ref1 = argv.t.split(":"), localport = _ref1[0], host = _ref1[1], port = _ref1[2];
-    client.start(localport, wsHost, "" + host + ":" + port);
+    if (host && port) {
+      client.start(localport, wsHost, "" + host + ":" + port);
+    } else {
+      client.start(localport, wsHost);
+    }
   } else {
     return console.log(optimist.help());
   }

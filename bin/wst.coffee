@@ -40,6 +40,9 @@ else if argv.t
   client = new wst.client
   wsHost = _.last(argv._)
   [localport, host, port] = argv.t.split(":")  # localport:host:port
-  client.start(localport, wsHost, "#{host}:#{port}")
+  if host && port
+    client.start(localport, wsHost, "#{host}:#{port}")
+  else
+    client.start(localport, wsHost)
 else
   return console.log(optimist.help());

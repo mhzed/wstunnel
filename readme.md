@@ -14,7 +14,7 @@ Run the websocket tunnel server at port 8080:
 
 Run the websocket tunnel client:
 
-    wstunnel -tunnel localport:host:port ws://host:8080
+    wstunnel -tunnel 33:2.2.2.2:33 ws://host:8080
 
 Note in above example, client picks the final tunnel destination, similar to ssh tunnel.  Alternatively for security
 reason, you can lock tunnel destination on server end, example:
@@ -25,11 +25,14 @@ reason, you can lock tunnel destination on server end, example:
     Client:
         wstunnel -t 33 ws://server:8080
 
+In both examples, connect to localhost:33 on client will be tunneled to 2.2.2.2:33 on server, via the websocket
+connection.
+
 ## Use case
 
 For tunneling over strict firewall.
 
-The tunnel server mode supports plain socket only, for SSL support (and/or http authentication etc...), use nginx.
+The tunnel server mode supports plain tcp socket only, for SSL support, use nginx.
 
 Sample setup:
 
@@ -65,5 +68,11 @@ On server, run nginx (>=1.3.13) with sample configuration:
 On client:
     wstunnel -t 99:targethost:targetport wss://mydomain.com
 
+## Caveats
 
+If you are using self signed certificate on server end for ssl connection, add following line:
+
+    rejectUnauthorized : false
+
+to ./node_modules/websocket/lib/WebSocketClient.js line 246
 
