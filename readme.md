@@ -25,8 +25,8 @@ reason, you can lock tunnel destination on server end, example:
     Client:
         wstunnel -t 33 ws://server:8080
 
-In both examples, connect to localhost:33 on client will be tunneled to 2.2.2.2:33 on server, via the websocket
-connection.
+In both examples, connection to localhost:33 on client will be tunneled to 2.2.2.2:33 on server via websocket
+connection in between.
 
 ## Use case
 
@@ -74,5 +74,5 @@ If you are using self signed certificate on server end for ssl connection, add f
 
     rejectUnauthorized : false
 
-to ./node_modules/websocket/lib/WebSocketClient.js line 246
+to ./node_modules/websocket/lib/WebSocketClient.js line 246.  Then launch client again.
 
