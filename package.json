@@ -18,6 +18,8 @@
     "tunnel"
   ],
   "license": "MIT",
+  "engines" : { "node" : "~0.10.21" },
+
   "dependencies": {
     "websocket": "1.0.8",
     "under_score": "0.1.0",
