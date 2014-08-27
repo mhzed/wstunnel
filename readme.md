@@ -71,7 +71,7 @@ Then on client:
 
 ### OpenVPN use case
 
-Suppose on the server you have OpenVpn installed on then default port 1194,  then run wstunnel as such:
+Suppose on the server you have OpenVpn installed on the default port 1194,  then run wstunnel as such:
 
     wstunnel -s 8888 -t 127.0.0.1:1194
     
