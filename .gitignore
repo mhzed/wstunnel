@@ -1,2 +1,3 @@
 *.map
+.idea/*
 node_modules/

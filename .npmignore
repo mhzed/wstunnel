@@ -1,3 +1,4 @@
 *.coffee
 *.map
+.idea/
 node_modules/

@@ -1,6 +1,6 @@
 # wstunnel
 
-Establish tcp tunnel over web socket connection.
+Establish a TCP socket tunnel over web socket connection, for circumventing strict firewalls.
 
 ## Installation
 
@@ -16,8 +16,8 @@ Run the websocket tunnel client:
 
     wstunnel -tunnel 33:2.2.2.2:33 ws://host:8080
 
-Note in above example, client picks the final tunnel destination, similar to ssh tunnel.  Alternatively for security
-reason, you can lock tunnel destination on server end, example:
+In the above example, client picks the final tunnel destination, similar to ssh tunnel.  Alternatively for security
+reason, you can lock tunnel destination on the server end, example:
 
     Server:
         wstunnel -s 8080 -t 2.2.2.2:33
@@ -30,11 +30,10 @@ connection in between.
 
 ## Use case
 
-For tunneling over strict firewall.
+For tunneling over strict firewalls: WebSocket is a part of the HTML5 standard, any reasonable firewall will unlikely
+be so strict as to break HTML5. 
 
-The tunnel server mode supports plain tcp socket only, for SSL support, use nginx.
-
-Sample setup:
+The tunnel server currently supports plain tcp socket only, for SSL support, use NGINX, shown below:
 
 On server:
     wstunnel -s 8080
@@ -65,14 +64,23 @@ On server, run nginx (>=1.3.13) with sample configuration:
         }
     }
 
-On client:
+Then on client:
+
     wstunnel -t 99:targethost:targetport wss://mydomain.com
 
-## Caveats
 
-If you are using self signed certificate on server end for ssl connection, add following line:
+### OpenVPN use case
 
-    rejectUnauthorized : false
+Suppose on the server you have OpenVpn installed on then default port 1194,  then run wstunnel as such:
 
-to ./node_modules/websocket/lib/WebSocketClient.js line 246.  Then launch client again.
+    wstunnel -s 8888 -t 127.0.0.1:1194
+    
+Now on the server, you have a websocket server listening on 80, any connection to 80 will be forwarded to  
+127.0.0.1:1194, the OpenVpn port.
+
+Now on client, you run:
+
+  wstunnel -t 1194 ws://server:8888
+  
+Then launch the OpenVpn client, connect to localhost:1194 will be same as connect to server's 1194 port.
 

@@ -1,5 +1,4 @@
 _ = require "under_score"
-wst = require "../lib/wst"
 
 optimist = require('optimist')
   .usage("""
@@ -30,6 +29,7 @@ if _.size(argv) == 2
   return console.log(optimist.help());
 
 if argv.s
+  wst = require "../lib/wst"
   if argv.t
     [host, port] = argv.t.split(":")
     server = new wst.server(host, port)
@@ -37,6 +37,8 @@ if argv.s
     server = new wst.server
   server.start(argv.s)
 else if argv.t
+  require "../lib/https_override" # allow any certificate
+  wst = require "../lib/wst"
   client = new wst.client
   wsHost = _.last(argv._)
   [localport, host, port] = argv.t.split(":")  # localport:host:port
