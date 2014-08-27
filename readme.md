@@ -75,12 +75,15 @@ Suppose on the server you have OpenVpn installed on then default port 1194,  the
 
     wstunnel -s 8888 -t 127.0.0.1:1194
     
-Now on the server, you have a websocket server listening on 80, any connection to 80 will be forwarded to  
+Now on the server, you have a websocket server listening on 8888, any connection to 8888 will be forwarded to  
 127.0.0.1:1194, the OpenVpn port.
 
 Now on client, you run:
 
-  wstunnel -t 1194 ws://server:8888
+    wstunnel -t 1194 ws://server:8888
   
 Then launch the OpenVpn client, connect to localhost:1194 will be same as connect to server's 1194 port.
+
+Suppose the firewall allows http traffic on target port 80 only, then setup a NGINX reverse proxy to listen on port 80,
+and proxy http traffic to localhost:8888 via host name.
 
