@@ -39,10 +39,10 @@ module.exports = bindSockets = (wsconn, tcpconn)->
   )
   wsconn.on('close', (reasonCode, description)->
     console.log((new Date()) + 'ws Peer ' + wsconn.remoteAddress + ' disconnected.');
-    #tcpconn.close()
     tcpconn.destroy()
   )
   tcpconn.on("close", ()->
     console.log((new Date()) + 'tunnel disconnected.');
     wsconn.close()
+
   )
