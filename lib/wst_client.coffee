@@ -26,7 +26,7 @@ module.exports = class wst_client
       );
       #wsClient.connect('ws://localhost:8080/?dst=192.168.187.130:22', 'tunnel-protocol');
       header = {}
-      match = wsHostUrl.match(/(https?:\/\/)(.*)@(.*)/)
+      match = wsHostUrl.match(/(wss?:\/\/)(.*)@(.*)/)
       if match
         header.Authorization = new Buffer(match[2])
         header.Authorization = header.Authorization.toString('base64')
