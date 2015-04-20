@@ -30,7 +30,7 @@ module.exports = class wst_client
       if match
         header.Authorization = new Buffer(match[2])
         header.Authorization = 'Basic ' + header.Authorization.toString('base64')
-        wsHostUrl = match[1] + match[3]
-      if remoteAddr then url = "#{wsHostUrl}/?dst=#{remoteAddr}" else url = "#{wsHostUrl}"
+        wsHostUrl2 = match[1] + match[3]
+      if remoteAddr then url = "#{wsHostUrl2}/?dst=#{remoteAddr}" else url = "#{wsHostUrl2}"
       wsClient.connect(url, 'tunnel-protocol', null, header);
     )
