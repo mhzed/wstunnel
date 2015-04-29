@@ -25,6 +25,12 @@ module.exports = class wst_client
         bindSockets(wsConn, tcpConn);
       );
       #wsClient.connect('ws://localhost:8080/?dst=192.168.187.130:22', 'tunnel-protocol');
-      if remoteAddr then url = "#{wsHostUrl}/?dst=#{remoteAddr}" else url = "#{wsHostUrl}"
-      wsClient.connect(url, 'tunnel-protocol');
+      header = {}
+      match = wsHostUrl.match(/(wss?:\/\/)(.*)@(.*)/)
+      if match
+        header.Authorization = new Buffer(match[2])
+        header.Authorization = 'Basic ' + header.Authorization.toString('base64')
+        wsHostUrl2 = match[1] + match[3]
+      if remoteAddr then url = "#{wsHostUrl2}/?dst=#{remoteAddr}" else url = "#{wsHostUrl2}"
+      wsClient.connect(url, 'tunnel-protocol', null, header);
     )
