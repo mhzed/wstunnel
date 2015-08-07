@@ -114,49 +114,6 @@ module.exports["test end"] = (test)->
   , 100
 
 
-if require.main == module
-  # test code
-  #require("../lib/http_override")('http://152.62.44.57:80', true)
-  require("../lib/httpSetup").config('http://localhost:3000', true)
-
-  https = require "https"
-  http = require "http"
-
-  req = http.request {
-    hostname  : 'marginalrevolution.com',
-    port      : 80,
-    method    : 'GET',
-    path      : '/',
-    headers   : {
-      Host : 'marginalrevolution.com'
-    }
-  }
-  req.on('response', (response) ->
-    body = ''
-    response.on('data', (data)-> body += data)
-    response.on('end', ()->
-      console.log "http ok" # body
-    )
-  )
-  req.end()
-
-  req = https.request {
-    hostname  : 'www1.royalbank.com',
-    port      : 443,
-    method    : 'GET',
-    path      : 'https://www1.royalbank.com/english/netaction/sgne.html',
-    headers   : {
-    }
-  }
-  req.on('response', (response) ->
-    body = ''
-    response.on('data', (data)-> body += data)
-    response.on('end', ()->
-      console.log "https ok" # body
-    )
-  )
-  req.end()
-
 ###
 Some proxy strips "Upgrade: websocket" header, thus crippling websocket connection
 ###
