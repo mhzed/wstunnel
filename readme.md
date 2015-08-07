@@ -28,6 +28,21 @@ reason, you can lock tunnel destination on the server end, example:
 In both examples, connection to localhost:33 on client will be tunneled to 2.2.2.2:33 on server via websocket
 connection in between.
 
+To tell client to connect via http proxy, do:
+
+    wstunnel -t 33:2.2.2.2:33 -p http://[user:pass@]proxyhost:proxyport wss://server:443
+
+When connecting to secure websocket server via "wss://", client might want to disable 'unauthorized' certificate 
+rejection, via adding the '-c' option.
+
+    wstunnel -t 33:2.2.2.2:33 -c -p http://[user:pass@]proxyhost:proxyport wss://server:443
+    
+This also makes you vulnerable to MITM attack, so use with caution.
+    
+To get help, just run
+
+    wstunnel
+
 ## Use case
 
 For tunneling over strict firewalls: WebSocket is a part of the HTML5 standard, any reasonable firewall will unlikely
@@ -84,6 +99,24 @@ Now on client, you run:
   
 Then launch the OpenVpn client, connect to localhost:1194 will be same as connect to server's 1194 port.
 
-Suppose the firewall allows http traffic on target port 80 only, then setup a NGINX reverse proxy to listen on port 80,
-and proxy http traffic to localhost:8888 via host name.
+This setup won't work if you are behind a strict firewall because:
+
+1. Non 80/443 ports are usually blocked by firewall.
+2. Stateful packet inspection will detect the content of your websocket tunnel, for example OPENVPN 
+   connection, or SSH connection, and then block it anyways.
+
+But the following setup works universally:
+
+1. Run wstunnel server mode
+        
+        wstunnel -s 8888 -t 127.0.0.1:1194
+        
+2. Run NGINX on server, listen on 443 for https connection, forward to wstunnel server localhost:8888
+3. On client, run wstunnel client mode using "wss://"
+
+        wstunnel -t 1194 wss://server
+
+4. Now on client, launch OPENVPN connection to localhost:1194, it will work.
+   
+The only possible way for above setup to not work is that your server is blacklisted by the firewall.
 

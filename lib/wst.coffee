@@ -1,4 +1,6 @@
 module.exports = {
-  server : require "./wst_server"
-  client : require "./wst_client"
+  server : require "./WstServer"
+  client : require "./WstClient"
+  bin    : require "../bin/wstunnel"
+  httpSetup : require "./httpSetup"
 }
