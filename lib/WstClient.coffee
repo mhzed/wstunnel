@@ -53,6 +53,9 @@ module.exports = class wst_client extends require('events').EventEmitter
       wsConnect = (cb)=>
         if remoteAddr then wsurl = "#{@wsHostUrl}/?dst=#{remoteAddr}" else wsurl = "#{@wsHostUrl}"
         wsClient = createWsClient();
+        urlo = url.parse wsurl
+        if urlo.auth
+          optionalHeaders.Authorization = 'Basic ' + (new Buffer(urlo.auth)).toString('base64')
         wsClient.connect(wsurl, 'tunnel-protocol', undefined, optionalHeaders)
         wsClient.on 'connectFailed', (error)=>cb(error)
         wsClient.on 'connect', (wsConn)=>
