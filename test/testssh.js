@@ -21,10 +21,10 @@
   };
 
   config = {
-    s_port: 11001,
+    s_port: 19001,
     t_port: 22,
-    ws_port: 11000,
-    host: '192.168.1.120'
+    ws_port: 19000,
+    host: '127.0.0.1'
   };
 
   server = new wst.server;
