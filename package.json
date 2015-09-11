@@ -27,7 +27,7 @@
     "node-uuid": "1.4.1",
     "underscore": "1.4.4",
     "optimist": "0.3.5",
-    "machine-uuid": "1.0.5"
+    "machine-uuid": "1.0.7"
   },
   "devDependencies": {
     "source-map-support": "0.1.2"
