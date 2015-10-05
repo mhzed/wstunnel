@@ -61,7 +61,7 @@ module.exports = (Server, Client)->
       if host && port
         client.start(localport, wsHost, "#{host}:#{port}", {'x-wstclient': machineId} )
       else
-        client.start(localport, wsHost, undefined, {'x-wstclient': machineId} )
+        client.start(argv.t, wsHost, undefined, {'x-wstclient': machineId} )
   else
     return console.log(optimist.help());
 
