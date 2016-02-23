@@ -34,7 +34,7 @@
             'x-wstclient': machineId
           });
         } else {
-          return client.start(localport, wsHost, void 0, {
+          return client.start(argv.t, wsHost, void 0, {
             'x-wstclient': machineId
           });
         }
