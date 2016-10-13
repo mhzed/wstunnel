@@ -89,9 +89,9 @@ Then on client:
 
 To use as a proxy for "ssh", run:
 
-    ssh -o ProxyCommand="wstunnel -c -t stdio:%h:%p https://wstserver" <user>@<sshdestination>
+    ssh -o ProxyCommand="wstunnel -c -t stdio:%h:%p https://wstserver" user@sshdestination
 
-Above command will ssh to "<user>@<sshdestination>" via wstunnel server at "https://wstserver".
+Above command will ssh to "user@sshdestination" via wstunnel server at "https://wstserver".
 
 
 ### OpenVPN use case
