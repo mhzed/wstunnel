@@ -1,6 +1,6 @@
 {
   "name": "wstunnel",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "tcp tunnel over websocket",
   "main": "./lib/wst.js",
   "scripts": {
@@ -21,13 +21,14 @@
     "node": "~0.10.21"
   },
   "dependencies": {
-    "websocket": "1.0.8",
+    "find-free-port": "^1.0.2",
     "lawg": "1.0.3",
-    "phuture": "1.0.2",
+    "machine-uuid": "1.0.7",
     "node-uuid": "1.4.1",
-    "underscore": "1.4.4",
     "optimist": "0.3.5",
-    "machine-uuid": "1.0.7"
+    "phuture": "1.0.2",
+    "underscore": "1.4.4",
+    "websocket": "1.0.8"
   },
   "devDependencies": {
     "source-map-support": "0.1.2"

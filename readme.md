@@ -38,15 +38,17 @@ rejection, via adding the '-c' option.
     wstunnel -t 33:2.2.2.2:33 -c -p http://[user:pass@]proxyhost:proxyport wss://server:443
     
 This also makes you vulnerable to MITM attack, so use with caution.
-    
+
 To get help, just run
 
     wstunnel
 
-## Use case
+## Use cases
 
 For tunneling over strict firewalls: WebSocket is a part of the HTML5 standard, any reasonable firewall will unlikely
 be so strict as to break HTML5. 
+
+### SSL setup
 
 The tunnel server currently supports plain tcp socket only, for SSL support, use NGINX, shown below:
 
@@ -83,6 +85,14 @@ Then on client:
 
     wstunnel -t 99:targethost:targetport wss://mydomain.com
 
+### SSH Proxy
+
+To use as a proxy for "ssh", run:
+
+    ssh -o ProxyCommand="wstunnel -c -t stdio:%h:%p https://wstserver" <user>@<sshdestination>
+
+Above command will ssh to "<user>@<sshdestination>" via wstunnel server at "https://wstserver".
+
 
 ### OpenVPN use case
 
@@ -102,10 +112,10 @@ Then launch the OpenVpn client, connect to localhost:1194 will be same as connec
 This setup won't work if you are behind a strict firewall because:
 
 1. Non 80/443 ports are usually blocked by firewall.
-2. Stateful packet inspection will detect the content of your websocket tunnel, for example OPENVPN 
-   connection, or SSH connection, and then block it anyways.
+2. Stateful packet inspection will be ablet detect the content of your websocket tunnel 
+   as OPENVPN traffic, then block it.
 
-But the following setup works universally:
+A more firewall proof setup would be to use wstunnel over SSL behind standard https port 443:
 
 1. Run wstunnel server mode
         
@@ -116,7 +126,5 @@ But the following setup works universally:
 
         wstunnel -t 1194 wss://server
 
-4. Now on client, launch OPENVPN connection to localhost:1194, it will work.
-   
-The only possible way for above setup to not work is that your server is blacklisted by the firewall.
+4. Now on client, launch OPENVPN connection to localhost:1194.
 
