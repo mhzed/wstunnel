@@ -50,7 +50,10 @@
                     port: port
                   }, function() {
                     process.stdin.pipe(conn);
-                    return conn.pipe(process.stdout);
+                    conn.pipe(process.stdout);
+                    return conn.on('finish', function() {
+                      return process.exit(0);
+                    });
                   });
                 });
               };

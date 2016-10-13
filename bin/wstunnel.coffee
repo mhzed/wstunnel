@@ -78,6 +78,7 @@ module.exports = (Server, Client)->
               conn = net.createConnection({host:'127.0.0.1', port}, ()=>
                 process.stdin.pipe(conn)
                 conn.pipe(process.stdout)
+                conn.on('finish', ()=>process.exit(0))
               )
             )
           )
