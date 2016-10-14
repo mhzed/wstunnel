@@ -36,26 +36,14 @@
           remoteAddr = toks[2] + ":" + toks[3];
         } else if (toks.length === 3) {
           if (toks[0] === 'stdio') {
-            require("find-free-port")(11200, 12000, '127.0.0.1', (function(_this) {
-              return function(err, port) {
-                localAddr = "127.0.0.1:" + port;
-                remoteAddr = toks[1] + ":" + toks[2];
-                return client.start(localAddr, wsHost, remoteAddr, {
-                  'x-wstclient': machineId
-                }, function() {
-                  var conn, net;
-                  net = require("net");
-                  return conn = net.createConnection({
-                    host: '127.0.0.1',
-                    port: port
-                  }, function() {
-                    process.stdin.pipe(conn);
-                    conn.pipe(process.stdout);
-                    return conn.on('finish', function() {
-                      return process.exit(0);
-                    });
-                  });
-                });
+            client.startStdio(wsHost, remoteAddr, {
+              'x-wstclient': machineId
+            }, (function(_this) {
+              return function(err) {
+                if (err) {
+                  console.error(err);
+                  return process.exit(1);
+                }
               };
             })(this));
             return;

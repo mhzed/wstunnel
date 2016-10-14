@@ -54,10 +54,8 @@ module.exports = (Server, Client)->
     require("machine-uuid") (machineId)->
       require("../lib/httpSetup").config(argv.proxy, argv.c)
       client = new Client()
-
       if argv.http
         client.setHttpOnly true
-
 
       wsHost = argv._[..-1][0]
       client.verbose()
@@ -70,17 +68,10 @@ module.exports = (Server, Client)->
         remoteAddr = "#{toks[2]}:#{toks[3]}"
       else if toks.length == 3
         if toks[0] == 'stdio'
-          require("find-free-port")(11200, 12000, '127.0.0.1', (err, port)=>
-            localAddr = "127.0.0.1:#{port}"
-            remoteAddr = "#{toks[1]}:#{toks[2]}"
-            client.start(localAddr, wsHost, remoteAddr, {'x-wstclient': machineId}, ()=>
-              net = require("net")
-              conn = net.createConnection({host:'127.0.0.1', port}, ()=>
-                process.stdin.pipe(conn)
-                conn.pipe(process.stdout)
-                conn.on('finish', ()=>process.exit(0))
-              )
-            )
+          client.startStdio(wsHost, remoteAddr, {'x-wstclient': machineId}, (err)=>
+            if (err)
+              console.error(err)
+              process.exit(1)
           )
           return
         else

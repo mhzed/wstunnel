@@ -50,43 +50,65 @@ module.exports = class wst_client extends require('events').EventEmitter
 
     @tcpServer.listen(localPort, localHost, cb)
     @tcpServer.on("connection", (tcpConn)=>
-      wsConnect = (cb)=>
-        if remoteAddr then wsurl = "#{@wsHostUrl}/?dst=#{remoteAddr}" else wsurl = "#{@wsHostUrl}"
-        wsClient = createWsClient();
-        urlo = url.parse wsurl
-        if urlo.auth
-          optionalHeaders.Authorization = 'Basic ' + (new Buffer(urlo.auth)).toString('base64')
-        wsClient.connect(wsurl, 'tunnel-protocol', undefined, optionalHeaders)
-        wsClient.on 'connectFailed', (error)=>cb(error)
-        wsClient.on 'connect', (wsConn)=>
-          wsStream = new WsStream(wsConn);
-          cb(null, wsStream)
-
-      httpConnect = (cb)=>
-        tunurl = @wsHostUrl.replace /^ws/, 'http'
-        if remoteAddr then tunurl += "?dst=#{remoteAddr}"
-        httpConn = new ClientConn(tunurl)
-        httpConn.connect optionalHeaders, (err)=>
-          if err then cb(err)
-          else cb(null, httpConn)
-
-      httpConnectCb = (error, httpConn)=>
-        if error
-          @emit 'connectHttpFailed', error
-          tcpConn.end();  # kill tunnel counter part
-        else
-          require("./bindStream")(httpConn, tcpConn)
-          @emit 'tunnel', httpConn, tcpConn
+      bind = (s, tcp)=>
+        require("./bindStream")(s, tcp)
+        @emit 'tunnel', s, tcp
 
       if @httpOnly
-        httpConnect httpConnectCb
+        @_httpConnect @wsHostUrl, remoteAddr, optionalHeaders, (err, httpConn)=>
+          if !err then bind(httpConn, tcpConn)
+          else tcpConn.end()
       else
-        wsConnect (error, wsStream)=>
-          if not error
-            require("./bindStream")(wsStream, tcpConn)
-            @emit 'tunnel', wsStream, tcpConn
+        @_wsConnect @wsHostUrl, remoteAddr, optionalHeaders, (error, wsStream)=>
+          if not error then bind(wsStream, tcpConn)
           else
             @emit 'connectFailed', error
-            httpConnect httpConnectCb
-
+            @_httpConnect @wsHostUrl, remoteAddr, optionalHeaders, (err, httpConn)=>
+              if !err then bind(httpConn, tcpConn)
+              else tcpConn.end()
     )
+
+  startStdio: (@wsHostUrl, remoteAddr, optionalHeaders, cb)->
+    bind = (s)=>
+      process.stdin.pipe(s)
+      s.pipe(process.stdout)
+      s.on('close', ()=>process.exit(0))
+      s.on('finish', ()=>process.exit(0))
+
+    if @httpOnly
+      @_httpConnect @wsHostUrl, remoteAddr, optionalHeaders, (err, httpConn)=>
+        if !err then bind(httpConn)
+        cb(err)
+    else
+      @_wsConnect @wsHostUrl, remoteAddr, optionalHeaders, (error, wsStream)=>
+        if not error
+          bind(wsStream)
+          cb()
+        else
+          @emit 'connectFailed', error
+          @_httpConnect @wsHostUrl, remoteAddr, optionalHeaders, (err, httpConn)=>
+            if !err then bind(httpConn)
+            cb(err)
+
+  _httpConnect : (url, remoteAddr, optionalHeaders, cb)->
+    tunurl = url.replace /^ws/, 'http'
+    if remoteAddr then tunurl += "?dst=#{remoteAddr}"
+    httpConn = new ClientConn(tunurl)
+    httpConn.connect optionalHeaders, (err)=>
+      if err
+        @emit 'connectHttpFailed', err
+        cb(err);
+      else
+        cb(null, httpConn)
+
+  _wsConnect : (wsHostUrl, remoteAddr, optionalHeaders, cb)->
+    if remoteAddr then wsurl = "#{wsHostUrl}/?dst=#{remoteAddr}" else wsurl = "#{wsHostUrl}"
+    wsClient = createWsClient();
+    urlo = url.parse wsurl
+    if urlo.auth
+      optionalHeaders.Authorization = 'Basic ' + (new Buffer(urlo.auth)).toString('base64')
+    wsClient.connect(wsurl, 'tunnel-protocol', undefined, optionalHeaders)
+    wsClient.on 'connectFailed', (error)=>cb(error)
+    wsClient.on 'connect', (wsConn)=>
+      wsStream = new WsStream(wsConn);
+      cb(null, wsStream)
