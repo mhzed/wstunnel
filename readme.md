@@ -8,9 +8,9 @@ npm install wstunnel
 
 ## Usage
 
-Run the websocket tunnel server at port 8080:
+Run the websocket tunnel server at port 8080 on all interfaces:
 
-    wstunnel -s 8080
+    wstunnel -s 0.0.0.0:8080
 
 Run the websocket tunnel client:
 
@@ -20,7 +20,7 @@ In the above example, client picks the final tunnel destination, similar to ssh 
 reason, you can lock tunnel destination on the server end, example:
 
     Server:
-        wstunnel -s 8080 -t 2.2.2.2:33
+        wstunnel -s 0.0.0.0:8080 -t 2.2.2.2:33
 
     Client:
         wstunnel -t 33 ws://server:8080
@@ -52,7 +52,8 @@ be so strict as to break HTML5.
 
 The tunnel server currently supports plain tcp socket only, for SSL support, use NGINX, shown below:
 
-On server:
+On server, listen on localhost:8080:
+
     wstunnel -s 8080
 
 On server, run nginx (>=1.3.13) with sample configuration:
@@ -100,7 +101,7 @@ Suppose on the server you have OpenVpn installed on the default port 1194,  then
 
     wstunnel -s 8888 -t 127.0.0.1:1194
     
-Now on the server, you have a websocket server listening on 8888, any connection to 8888 will be forwarded to  
+Now on the server, you have a websocket server listening on localhost:8888, any connection to 8888 will be forwarded to  
 127.0.0.1:1194, the OpenVpn port.
 
 Now on client, you run:

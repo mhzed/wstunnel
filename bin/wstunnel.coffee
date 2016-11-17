@@ -5,14 +5,14 @@ module.exports = (Server, Client)->
     .usage("""
 
        Run websocket tunnel server or client.
-         To run server: wstunnel -s 8080
+         To run server: wstunnel -s 0.0.0.0:8080
          To run client: wstunnel -t localport:host:port ws[s]://wshost:wsport
          Or client via proxy: wstunnel -t localport:host:port -p http://[user:pass@]host:port ws[s]://wshost:wsport
 
        Now connecting to localhost:localport is same as connecting to host:port on wshost
 
        For security, you can "lock" the tunnel destination on server side, for eample:
-         wstunnel -s 8080 -t host:port
+         wstunnel -s 0.0.0.0:8080 -t host:port
        Server will tunnel incomming websocket connection to host:port only, so client can just run
          wstunnel -t localport ws://wshost:port
        If client run:
@@ -34,14 +34,14 @@ module.exports = (Server, Client)->
     .boolean('http')
     .alias('c', 'anycert')
     .default('c', false)
-    .describe('s', 'run as server, specify listen port')
-    .describe('tunnel', 'run as tunnel client, specify localport:host:port')
+    .describe('s', 'run as server, listen on [localip:]localport, default localip is 127.0.0.1')
+    .describe('tunnel', 'run as tunnel client, specify [localip:]localport:host:port')
     .describe("proxy", "connect via a http proxy server in client mode")
     .describe("c", "accpet any certificates")
     .argv
   ;
 
-  if argv.s
+  if argv.s   # server mode
     if argv.t
       [host, port] = argv.t.split(":")
       server = new Server(host, port)
@@ -50,7 +50,7 @@ module.exports = (Server, Client)->
     server.start argv.s, (err)=>
       if not err then console.log " Server is listening on #{argv.s}"
 
-  else if argv.t
+  else if argv.t  # client mode
     require("machine-uuid") (machineId)->
       require("../lib/httpSetup").config(argv.proxy, argv.c)
       client = new Client()
@@ -60,6 +60,7 @@ module.exports = (Server, Client)->
       wsHost = argv._[..-1][0]
       client.verbose()
 
+      DefaultLocalAddr = "127.0.0.1"
       localAddr = undefined
       remoteAddr = undefined
       toks = argv.t.split(":")
@@ -75,10 +76,10 @@ module.exports = (Server, Client)->
           )
           return
         else
-          localAddr = "127.0.0.1:#{toks[0]}"
+          localAddr = "#{DefaultLocalAddr}:#{toks[0]}"
           remoteAddr = "#{toks[1]}:#{toks[2]}"
       else if toks.length == 1
-        localAddr = "127.0.0.1:#{toks[0]}"
+        localAddr = "#{DefaultLocalAddr}:#{toks[0]}"
 
       client.start(localAddr, wsHost, remoteAddr, {'x-wstclient': machineId});
 

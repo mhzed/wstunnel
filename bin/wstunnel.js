@@ -3,7 +3,7 @@
   module.exports = function(Server, Client) {
     var argv, host, optimist, port, ref, server;
     optimist = require('optimist');
-    argv = optimist.usage("\nRun websocket tunnel server or client.\n  To run server: wstunnel -s 8080\n  To run client: wstunnel -t localport:host:port ws[s]://wshost:wsport\n  Or client via proxy: wstunnel -t localport:host:port -p http://[user:pass@]host:port ws[s]://wshost:wsport\n\nNow connecting to localhost:localport is same as connecting to host:port on wshost\n\nFor security, you can \"lock\" the tunnel destination on server side, for eample:\n  wstunnel -s 8080 -t host:port\nServer will tunnel incomming websocket connection to host:port only, so client can just run\n  wstunnel -t localport ws://wshost:port\nIf client run:\n  wstunnel -t localport:otherhost:otherport ws://wshost:port\n  * otherhost:otherport is ignored, tunnel destination is still \"host:port\" as specified on server.\n\nIn client mode, you can bind stdio to the tunnel by running:\n  wstunnel -t stdio:host:port ws[s]://wshost:wsport\nThis allows the command to be used as ssh proxy:\n  ssh -o ProxyCommand=\"wstunnel -c -t stdio:%h:%p https://wstserver\" user@sshdestination\nAbove command will ssh to \"user@sshdestination\" via the wstunnel server at \"https://wstserver\"\n").string("s").string("t").string("proxy").alias('t', "tunnel").boolean('c').boolean('http').alias('c', 'anycert')["default"]('c', false).describe('s', 'run as server, specify listen port').describe('tunnel', 'run as tunnel client, specify localport:host:port').describe("proxy", "connect via a http proxy server in client mode").describe("c", "accpet any certificates").argv;
+    argv = optimist.usage("\nRun websocket tunnel server or client.\n  To run server: wstunnel -s 0.0.0.0:8080\n  To run client: wstunnel -t localport:host:port ws[s]://wshost:wsport\n  Or client via proxy: wstunnel -t localport:host:port -p http://[user:pass@]host:port ws[s]://wshost:wsport\n\nNow connecting to localhost:localport is same as connecting to host:port on wshost\n\nFor security, you can \"lock\" the tunnel destination on server side, for eample:\n  wstunnel -s 0.0.0.0:8080 -t host:port\nServer will tunnel incomming websocket connection to host:port only, so client can just run\n  wstunnel -t localport ws://wshost:port\nIf client run:\n  wstunnel -t localport:otherhost:otherport ws://wshost:port\n  * otherhost:otherport is ignored, tunnel destination is still \"host:port\" as specified on server.\n\nIn client mode, you can bind stdio to the tunnel by running:\n  wstunnel -t stdio:host:port ws[s]://wshost:wsport\nThis allows the command to be used as ssh proxy:\n  ssh -o ProxyCommand=\"wstunnel -c -t stdio:%h:%p https://wstserver\" user@sshdestination\nAbove command will ssh to \"user@sshdestination\" via the wstunnel server at \"https://wstserver\"\n").string("s").string("t").string("proxy").alias('t', "tunnel").boolean('c').boolean('http').alias('c', 'anycert')["default"]('c', false).describe('s', 'run as server, listen on [localip:]localport, default localip is 127.0.0.1').describe('tunnel', 'run as tunnel client, specify [localip:]localport:host:port').describe("proxy", "connect via a http proxy server in client mode").describe("c", "accpet any certificates").argv;
     if (argv.s) {
       if (argv.t) {
         ref = argv.t.split(":"), host = ref[0], port = ref[1];
@@ -20,7 +20,7 @@
       })(this));
     } else if (argv.t) {
       return require("machine-uuid")(function(machineId) {
-        var client, localAddr, remoteAddr, toks, wsHost;
+        var DefaultLocalAddr, client, localAddr, remoteAddr, toks, wsHost;
         require("../lib/httpSetup").config(argv.proxy, argv.c);
         client = new Client();
         if (argv.http) {
@@ -28,6 +28,7 @@
         }
         wsHost = argv._.slice(0)[0];
         client.verbose();
+        DefaultLocalAddr = "127.0.0.1";
         localAddr = void 0;
         remoteAddr = void 0;
         toks = argv.t.split(":");
@@ -48,11 +49,11 @@
             })(this));
             return;
           } else {
-            localAddr = "127.0.0.1:" + toks[0];
+            localAddr = DefaultLocalAddr + ":" + toks[0];
             remoteAddr = toks[1] + ":" + toks[2];
           }
         } else if (toks.length === 1) {
-          localAddr = "127.0.0.1:" + toks[0];
+          localAddr = DefaultLocalAddr + ":" + toks[0];
         }
         return client.start(localAddr, wsHost, remoteAddr, {
           'x-wstclient': machineId
