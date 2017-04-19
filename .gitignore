@@ -2,3 +2,4 @@
 .idea/*
 compile/*
 node_modules/
+lib/

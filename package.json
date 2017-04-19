@@ -4,6 +4,7 @@
   "description": "tcp tunnel over websocket",
   "main": "./lib/wst.js",
   "scripts": {
+    "prepublish": "coffee --compile --output lib/ src/",
     "test": "nodeunit test/test.js"
   },
   "repository": "https://github.com/mhzed/wstunnel",
@@ -27,7 +28,8 @@
     "optimist": "0.3.5",
     "phuture": "1.0.2",
     "underscore": "1.4.4",
-    "websocket": "1.0.8"
+    "websocket": "1.0.8",
+    "coffee-script": "^1.10.0"
   },
   "devDependencies": {
     "source-map-support": "0.1.2"
