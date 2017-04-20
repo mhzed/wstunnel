@@ -1,10 +1,12 @@
 {
   "name": "wstunnel",
-  "version": "1.1.5",
+  "version": "1.2.0",
   "description": "tcp tunnel over websocket",
   "main": "./lib/wst.js",
   "scripts": {
-    "test": "nodeunit test/test.js"
+    "test": "nodeunit test/test.js",
+    "testssh": "nodeunit test/testssh.js",
+    "decaffeinate" : "decaffeinate --keep-commonjs --prefer-const **/*.coffee"
   },
   "repository": "https://github.com/mhzed/wstunnel",
   "author": {
