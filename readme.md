@@ -14,7 +14,7 @@ Run the websocket tunnel server at port 8080 on all interfaces:
 
 Run the websocket tunnel client:
 
-    wstunnel -tunnel 33:2.2.2.2:33 ws://host:8080
+    wstunnel -t 33:2.2.2.2:33 ws://host:8080
 
 In the above example, client picks the final tunnel destination, similar to ssh tunnel.  Alternatively for security
 reason, you can lock tunnel destination on the server end, example:
