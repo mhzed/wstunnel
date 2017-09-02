@@ -1,7 +1,7 @@
 {
   "name": "wstunnel",
-  "version": "1.2.1",
-  "description": "tcp tunnel over websocket",
+  "version": "1.2.2",
+  "description": "tunnel over websocket",
   "main": "./lib/wst.js",
   "scripts": {
     "test": "nodeunit test/test.js",
@@ -20,7 +20,7 @@
   ],
   "license": "MIT",
   "engines": {
-    "node": "~0.10.21"
+    "node": "*"
   },
   "dependencies": {
     "lawg": "1.0.3",
