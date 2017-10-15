@@ -1,3 +1,6 @@
+const globalTunnel = require('global-tunnel-ng');
+var urlParse = require('url').parse;
+
 const Help = `
 Run websocket tunnel server or client.
  To run server: wstunnel -s 0.0.0.0:8080
@@ -51,10 +54,33 @@ module.exports = (Server, Client) => {
     server.start(argv.s, (err) => err ? console.log(` Server is listening on ${argv.s}`) : null)
   } else if (argv.t) {
   // client mode
+    function tryParse(url) {
+      if (!url) {
+        return null;
+      }
+      var parsed = urlParse(url);
+      return {
+        protocol: parsed.protocol,
+        host: parsed.hostname,
+        port: parseInt(parsed.port, 10),
+        proxyAuth: parsed.auth
+      };
+    }
 
     const uuid = require("machine-uuid");
     uuid((machineId) => {
-      require("../lib/httpSetup").config(argv.proxy, argv.c)
+      let conf = {};
+      if ( argv.proxy ) {
+        conf = tryParse( argv.proxy );
+        if ( argv.c ) {
+          conf.proxyHttpsOptions =  {rejectUnauthorized: false};
+          process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+        }
+        globalTunnel.initialize(conf);
+      } else {
+        require("../lib/httpSetup").config(argv.proxy, argv.c)
+      }
+
       let client = new Client()
       if (argv.http) {
         client.setHttpOnly(true)
