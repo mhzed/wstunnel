@@ -1,6 +1,6 @@
 {
   "name": "wstunnel",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "tunnel over websocket",
   "main": "./lib/wst.js",
   "scripts": {
@@ -28,7 +28,7 @@
     "optimist": "0.3.5",
     "phuture": "1.0.2",
     "underscore": "1.4.4",
-    "websocket": "1.0.8"
+    "websocket": "^1.0.25"
   },
   "devDependencies": {
     "source-map-support": "0.1.2"
