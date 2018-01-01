@@ -1,6 +1,6 @@
 {
   "name": "wstunnel",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "tunnel over websocket",
   "main": "./lib/wst.js",
   "scripts": {

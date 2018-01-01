@@ -89,7 +89,7 @@ module.exports = (Server, Client) => {
       let wsHostUrl = argv._[0]
       client.verbose()
 
-      let DefaultLocalAddr = "127.0.0.1"
+      let DefaultLocalIp = "127.0.0.1"
       let localAddr
       let remoteAddr
       let toks = argv.t.split(":")
@@ -97,6 +97,7 @@ module.exports = (Server, Client) => {
         localAddr = `${toks[0]}:${toks[1]}`
         remoteAddr = `${toks[2]}:${toks[3]}`
       } else if (toks.length === 3) {
+        remoteAddr = `${toks[1]}:${toks[2]}`
         if (toks[0] === 'stdio') {
           client.startStdio(wsHostUrl, remoteAddr, {'x-wstclient': machineId}, (err) => {
             if (err) {
@@ -106,11 +107,10 @@ module.exports = (Server, Client) => {
           })
           return
         } else {
-          localAddr = `${DefaultLocalAddr}:${toks[0]}`
-          remoteAddr = `${toks[1]}:${toks[2]}`
+          localAddr = `${DefaultLocalIp}:${toks[0]}`
         }
       } else if (toks.length === 1) {
-        localAddr = `${DefaultLocalAddr}:${toks[0]}`
+        localAddr = `${DefaultLocalIp}:${toks[0]}`
       }
       client.start(localAddr, wsHostUrl, remoteAddr, {'x-wstclient': machineId});
     })
