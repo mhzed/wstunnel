@@ -129,3 +129,23 @@ A more firewall proof setup would be to use wstunnel over SSL behind standard ht
 
 4. Now on client, launch OPENVPN connection to localhost:1194.
 
+### RDP use case
+
+Let's say you want to use a Remote Desktop connection to a machine with IP 2.2.2.2    
+Run the wstunnel server on a different machine, tunnelling to the destination on the RDP port 3389:
+
+         wstunnel -s 0.0.0.0:8080 -t 2.2.2.2:3389
+
+On the destination, you need to tweak some registry settings to relax the security policy for Remote Desktop.
+
+        Open RegEdit, and navigate to the following key:
+        HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp
+        Change "SecurityLayer" to 0
+        Change "SelectNetworkDetect" to 0
+        Reboot
+
+On the client, first start wstunnel:
+
+        wstunnel -t 3389 ws://server:8080
+        
+Now you can just open Remote Desktop Connection and connect to `localhost`
