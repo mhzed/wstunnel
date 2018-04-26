@@ -4,7 +4,7 @@ Establish a TCP socket tunnel over web socket connection, for circumventing stri
 
 ## Installation
 
-npm install wstunnel
+npm install -g wstunnel
 
 ## Usage
 
