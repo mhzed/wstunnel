@@ -1,4 +1,3 @@
-(require("source-map-support")).install();
 const { spawn } = require('child_process');
 const path = require('path');
 const wst = require("../lib/wst");
