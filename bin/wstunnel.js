@@ -40,7 +40,7 @@ module.exports = (Server, Client) => {
     .describe('s', 'run as server, listen on [localip:]localport, default localip is 127.0.0.1')
     .describe('tunnel', 'run as tunnel client, specify [localip:]localport:host:port')
     .describe("proxy", "connect via a http proxy server in client mode")
-    .describe("c", "accpet any certificates")
+    .describe("c", "accept any certificates")
     .argv;
 
   if (argv.s) {
