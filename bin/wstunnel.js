@@ -35,6 +35,7 @@ module.exports = (Server, Client) => {
     .alias('t', "tunnel")
     .boolean('c')
     .boolean('http')
+    .string('uuid')
     .alias('c', 'anycert')
     .default('c', false)
     .describe('s', 'run as server, listen on [localip:]localport, default localip is 127.0.0.1')
@@ -52,7 +53,7 @@ module.exports = (Server, Client) => {
       server = new Server()
     }
     server.start(argv.s, (err) => err ? console.log(` Server is listening on ${argv.s}`) : null)
-  } else if (argv.t) {
+  } else if (argv.t || argv.uuid !== undefined) {
   // client mode
     function tryParse(url) {
       if (!url) {
@@ -69,6 +70,12 @@ module.exports = (Server, Client) => {
 
     const uuid = require("machine-uuid");
     uuid((machineId) => {
+      if (argv.uuid === true) { // --uuid without param
+        console.log(machineId);
+        return;
+      } else if (argv.uuid){
+        machineId = argv.uuid;
+      }
       let conf = {};
       if ( argv.proxy ) {
         conf = tryParse( argv.proxy );
@@ -118,4 +125,3 @@ module.exports = (Server, Client) => {
     return console.log(optimist.help());
   }
 }
-
