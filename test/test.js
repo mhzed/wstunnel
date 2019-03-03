@@ -33,7 +33,8 @@ module.exports["setup ws tunnel"] = test =>
   server.start(config.ws_port, function(err) {
     test.ifError(err);
     log('ws server is setup');
-    return client.start(config.s_port, `ws://localhost:${config.ws_port}`, `localhost:${config.t_port}`, function(err) {
+    return client.start("localhost", config.s_port, `ws://localhost:${config.ws_port}`, 
+    `localhost:${config.t_port}`, {}, function(err) {
       test.ifError(err);
       log("tunnel is setup");
       return test.done();

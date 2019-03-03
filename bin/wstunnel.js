@@ -1,4 +1,6 @@
-const globalTunnel = require('global-tunnel-ng');
+const SocksProxyAgent = require('socks-proxy-agent');
+const HttpProxyAgent = require('http-proxy-agent');
+const HttpsProxyAgent = require('https-proxy-agent');
 var urlParse = require('url').parse;
 
 const Help = `
@@ -7,7 +9,7 @@ Run websocket tunnel server or client.
  To run client: wstunnel -t localport:host:port ws[s]://wshost:wsport
  Or client via proxy: wstunnel -t localport:host:port -p http://[user:pass@]host:port ws[s]://wshost:wsport
 
-Now connecting to localhost:localport is same as connecting to host:port on wshost
+Connecting to localhost:localport is the same as connecting to host:port on wshost
 
 For security, you can "lock" the tunnel destination on server side, for eample:
  wstunnel -s 0.0.0.0:8080 -t host:port
@@ -40,8 +42,10 @@ module.exports = (Server, Client) => {
     .default('c', false)
     .describe('s', 'run as server, listen on [localip:]localport, default localip is 127.0.0.1')
     .describe('tunnel', 'run as tunnel client, specify [localip:]localport:host:port')
-    .describe("proxy", "connect via a http proxy server in client mode")
+    .describe("proxy", "connect via a http or socks proxy server in client mode, "
+        + "format: socks://ip:port or http[s]://host:port")
     .describe("c", "accept any certificates")
+    .describe("http", "force to use http tunnel")
     .argv;
 
   if (argv.s) {
@@ -54,20 +58,7 @@ module.exports = (Server, Client) => {
     }
     server.start(argv.s, (err) => err ? console.log(` Server is listening on ${argv.s}`) : null)
   } else if (argv.t || argv.uuid !== undefined) {
-  // client mode
-    function tryParse(url) {
-      if (!url) {
-        return null;
-      }
-      var parsed = urlParse(url);
-      return {
-        protocol: parsed.protocol,
-        host: parsed.hostname,
-        port: parseInt(parsed.port, 10),
-        proxyAuth: parsed.auth
-      };
-    }
-
+    // client mode
     const uuid = require("machine-uuid");
     uuid((machineId) => {
       if (argv.uuid === true) { // --uuid without param
@@ -76,52 +67,62 @@ module.exports = (Server, Client) => {
       } else if (argv.uuid){
         machineId = argv.uuid;
       }
-      let conf = {};
-      if ( argv.proxy ) {
-        conf = tryParse( argv.proxy );
-        if ( argv.c ) {
-          conf.proxyHttpsOptions =  {rejectUnauthorized: false};
-          process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-        }
-        globalTunnel.initialize(conf);
-      } else {
-        require("../lib/httpSetup").config(argv.proxy, argv.c)
+      if (argv.c) {
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
       }
-
       let client = new Client()
+      let wsHostUrl = argv._[0]
+      
+      if ( argv.proxy ) {
+        const conf = urlParse(argv.proxy );
+        if (conf.protocol === "socks:") {
+          client.setAgentMaker((c) => new SocksProxyAgent(Object.assign({}, c, conf)));
+        } else if (conf.protocol === "https:" || conf.protocol === "http:") {
+          const p = urlParse(wsHostUrl).protocol;
+          if ('wss:' === p || 'https:' === p)
+            client.setAgentMaker((c) => new HttpsProxyAgent(Object.assign({}, c, conf)));
+          else if ('ws:' === p || 'http:' === p)
+            client.setAgentMaker((c) => new HttpProxyAgent(Object.assign({}, c, conf)));
+          else {
+            console.log("Invalid target " + wsHostUrl);
+            process.exit(1);  
+          }
+        } else {
+          console.log("Invalid proxy " + argv.proxy);
+          process.exit(1);
+        }
+      }
       if (argv.http) {
         client.setHttpOnly(true)
       }
-
-      let wsHostUrl = argv._[0]
       client.verbose()
 
-      let DefaultLocalIp = "127.0.0.1"
-      let localAddr
-      let remoteAddr
+      let localHost = "127.0.0.1", localPort;
+      let remoteAddr;
       let toks = argv.t.split(":")
       if (toks.length === 4) {
-        localAddr = `${toks[0]}:${toks[1]}`
+        [localHost, localPort] = toks;
         remoteAddr = `${toks[2]}:${toks[3]}`
       } else if (toks.length === 3) {
         remoteAddr = `${toks[1]}:${toks[2]}`
         if (toks[0] === 'stdio') {
-          client.startStdio(wsHostUrl, remoteAddr, {'x-wstclient': machineId}, (err) => {
-            if (err) {
-              console.error(err)
-              process.exit(1)
-            }
-          })
-          return
+          localHost = toks[0];
         } else {
-          localAddr = `${DefaultLocalIp}:${toks[0]}`
+          localPort = toks[0];
         }
-      } else if (toks.length === 1) {
-        localAddr = `${DefaultLocalIp}:${toks[0]}`
+      } else {
+        console.log("Invalid tunnel option " + argv.t);
+        console.log(optimist.help());
+        process.exit(1);
       }
-      client.start(localAddr, wsHostUrl, remoteAddr, {'x-wstclient': machineId});
+      localPort = parseInt(localPort);
+      if (localHost === "stdio") {
+        client.startStdio(wsHostUrl, remoteAddr, {'x-wstclient': machineId});
+      } else {
+        client.start(localHost, localPort, wsHostUrl, remoteAddr, {'x-wstclient': machineId});
+      }
     })
   } else {
-    return console.log(optimist.help());
+    console.log(optimist.help());
   }
 }
