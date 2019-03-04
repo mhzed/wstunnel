@@ -7,7 +7,8 @@ const Help = `
 Run websocket tunnel server or client.
  To run server: wstunnel -s 0.0.0.0:8080
  To run client: wstunnel -t localport:host:port ws[s]://wshost:wsport
- Or client via proxy: wstunnel -t localport:host:port -p http://[user:pass@]host:port ws[s]://wshost:wsport
+ Client via http proxy: wstunnel -t localport:host:port -p http://[user:pass@]host:port ws[s]://wshost:wsport
+ Client via socks proxy: wstunnel -t localport:host:port -p socks://[user:pass@]ip:port ws[s]://wshost:wsport
 
 Connecting to localhost:localport is the same as connecting to host:port on wshost
 
@@ -40,10 +41,9 @@ module.exports = (Server, Client) => {
     .string('uuid')
     .alias('c', 'anycert')
     .default('c', false)
-    .describe('s', 'run as server, listen on [localip:]localport, default localip is 127.0.0.1')
+    .describe('s', 'run as server, listen on [localip:]localport')
     .describe('tunnel', 'run as tunnel client, specify [localip:]localport:host:port')
-    .describe("proxy", "connect via a http or socks proxy server in client mode, "
-        + "format: socks://ip:port or http[s]://host:port")
+    .describe("proxy", "connect via a http or socks proxy server in client mode ")
     .describe("c", "accept any certificates")
     .describe("http", "force to use http tunnel")
     .argv;
