@@ -23,7 +23,7 @@ If client run:
 In client mode, you can bind stdio to the tunnel by running:
  wstunnel -t stdio:host:port ws[s]://wshost:wsport
 This allows the command to be used as ssh proxy:
- ssh -o ProxyCommand="wstunnel -c -t stdio:%h:%p https://wstserver" user@sshdestination
+ ssh -o ProxyCommand="wstunnel -t stdio:%h:%p https://wstserver" user@sshdestination
 Above command will ssh to "user@sshdestination" via the wstunnel server at "https://wstserver"
 
 `
