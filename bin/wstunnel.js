@@ -110,6 +110,9 @@ module.exports = (Server, Client) => {
         } else {
           localPort = toks[0];
         }
+      } else if (toks.length === 1) {
+        remoteAddr = "";
+        localPort = toks[0];
       } else {
         console.log("Invalid tunnel option " + argv.t);
         console.log(optimist.help());
