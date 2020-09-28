@@ -30,9 +30,7 @@ To tell client to connect via http proxy, do:
 
     wstunnel -t 33:2.2.2.2:33 -p http://[user:pass@]proxyhost:proxyport wss://server:443
 
-When connecting to secure websocket server via "wss://", client might want to disable 'unauthorized' certificate rejection, via adding the '-c' option.
-
-    wstunnel -t 33:2.2.2.2:33 -c -p http://[user:pass@]proxyhost:proxyport wss://server:443
+For dev/test purpose, client can set '-c' option to disable ssl certificate check.
     
 This also makes you vulnerable to MITM attack, so use with caution.
 
@@ -47,7 +45,7 @@ A public docker image "mhzed/wstunnel" is now available.
 Example:
 ```
 # run as client to connect to wss://server.com, tunnel localhost:2244 to target.ip:22 
-docker run --rm -d -p 2244:2244 mhzed/wstunnel -c -t 0.0.0.0:2244:target.ip:22 wss://server.com
+docker run --rm -d -p 2244:2244 mhzed/wstunnel -t 0.0.0.0:2244:target.ip:22 wss://server.com
 ```
 
 Notice "-t 0.0.0.0:2244..." above.  By default wstunnel binds to localhost which is unreachable inside a docker container, so make sure to specify "0.0.0.0" to bind to all local IPs.
@@ -100,7 +98,7 @@ Then on client:
 To use as a proxy for "ssh", run:
 
 ```
-ssh -o ProxyCommand="wstunnel -c -t stdio:%h:%p https://server" user@sshDestination
+ssh -o ProxyCommand="wstunnel -t stdio:%h:%p https://server" user@sshDestination
 ```
 
 Above command will ssh to "user@sshDestination" via wstunnel server at "https://server".
