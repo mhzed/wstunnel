@@ -1,25 +1,25 @@
-const { exec } = require("child_process");
-const path = require("path");
-const wst = require("../lib/wst");
-const net = require("net");
-const _log = require("lawg");
-const future = require("phuture");
-const assert = require("assert");
-const log = (msg) => _log(msg + "\n");
+const { exec } = require('child_process');
+const path = require('path');
+const wst = require('../lib/wst');
+const net = require('net');
+const _log = require('lawg');
+const future = require('phuture');
+const assert = require('assert');
+const log = (msg) => _log(msg + '\n');
 
 const config = {
   s_port: 19001,
   t_port: 22,
   ws_port: 19000,
-  host: "127.0.0.1",
+  host: '127.0.0.1',
 };
 
 const server = new wst.server();
 const client = new wst.client();
 client.setHttpOnly(true);
 
-describe("ssh over wstunnel", () => {
-  it("setup ws tunnel", (done) =>
+describe('ssh over wstunnel', () => {
+  it('setup ws tunnel', (done) =>
     server.start(`${config.host}:${config.ws_port}`, function (err) {
       if (err) done(err);
       return client.start(
@@ -34,7 +34,7 @@ describe("ssh over wstunnel", () => {
       );
     }));
 
-  it("ssh", function (done) {
+  it('ssh', function (done) {
     const cmdline = `ssh -oUserKnownHostsFile=/dev/null -oStrictHostKeyChecking=no -p ${config.s_port} ${config.host} \"echo 'echo'\"`;
     return exec(cmdline, function (err, stdout, stderr) {
       if (err) {

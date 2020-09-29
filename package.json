@@ -6,7 +6,8 @@
   "scripts": {
     "test": "mocha test/test.js",
     "testssh": "mocha test/testssh.js",
-    "decaffeinate": "decaffeinate --keep-commonjs --prefer-const **/*.coffee"
+    "decaffeinate": "decaffeinate --keep-commonjs --prefer-const **/*.coffee",
+    "prettier": "prettier --write ."
   },
   "repository": "https://github.com/mhzed/wstunnel",
   "author": {
@@ -35,6 +36,7 @@
     "websocket": "^1.0.28"
   },
   "devDependencies": {
+    "prettier": "^2.1.2",
     "mocha": "^8.1.2"
   },
   "bin": {

@@ -1,11 +1,11 @@
-const { spawn } = require("child_process");
-const path = require("path");
-const wst = require("../lib/wst");
-const net = require("net");
-const _log = require("lawg");
-const assert = require("assert");
+const { spawn } = require('child_process');
+const path = require('path');
+const wst = require('../lib/wst');
+const net = require('net');
+const _log = require('lawg');
+const assert = require('assert');
 
-const log = (msg) => _log(msg + "\n");
+const log = (msg) => _log(msg + '\n');
 
 const config = {
   s_port: 11001,
@@ -17,50 +17,50 @@ const server = new wst.server();
 const client = new wst.client();
 let echo_server = null;
 
-describe("wstunnel", () => {
+describe('wstunnel', () => {
   /*
   client -> wsClient:s_port -> wsServer:ws_port -> echo_server:t_port
 */
-  it("etag header", function () {
+  it('etag header', function () {
     const s = { x: 1, y: 2 };
-    const eheader = require("../lib/etagHeader");
+    const eheader = require('../lib/etagHeader');
     const d = eheader.fromEtag(eheader.toEtag(s));
     assert.equal(s.x, d.x);
     assert.equal(s.y, d.y);
   });
 
-  it("setup ws tunnel", (done) =>
+  it('setup ws tunnel', (done) =>
     // setup ws server
     server.start(config.ws_port, function (err) {
       if (err) done(err);
-      log("ws server is setup");
+      log('ws server is setup');
       return client.start(
-        "localhost",
+        'localhost',
         config.s_port,
         `ws://localhost:${config.ws_port}`,
         `localhost:${config.t_port}`,
         {},
         function (err) {
           if (err) done(err);
-          log("tunnel is setup");
+          log('tunnel is setup');
           done();
         }
       );
     }));
 
-  it("setup sock echo server", function (done) {
-    const listener = (conn) => conn.on("data", (data) => conn.write(data));
+  it('setup sock echo server', function (done) {
+    const listener = (conn) => conn.on('data', (data) => conn.write(data));
     echo_server = net.createServer(listener);
     return echo_server.listen(config.t_port, function () {
-      log("echo sock server is setup");
+      log('echo sock server is setup');
       done();
     });
   });
 
-  it("test echo", function (done) {
-    var conn = net.connect({ port: config.s_port }, () => conn.write("msg"));
-    return conn.on("data", function (data) {
-      assert.equal(data, "msg", "echoed");
+  it('test echo', function (done) {
+    var conn = net.connect({ port: config.s_port }, () => conn.write('msg'));
+    return conn.on('data', function (data) {
+      assert.equal(data, 'msg', 'echoed');
       return done();
     });
   });
@@ -93,18 +93,18 @@ describe("wstunnel", () => {
   const recvEcho = function (conn, size, doneCb) {
     const rb = new Buffer(size);
     let rbi = 0;
-    conn.on("data", function (data) {
+    conn.on('data', function (data) {
       data.copy(rb, rbi);
       rbi += data.length;
       if (rbi >= size) {
         return conn.end();
       }
     });
-    return conn.on("close", () => doneCb(rb));
+    return conn.on('close', () => doneCb(rb));
   };
 
   // echo large data
-  it("test echo stream", function (done) {
+  it('test echo stream', function (done) {
     const n = 1000000;
     const sb = makeBuf(n);
     var conn = net.connect({ port: config.s_port }, () => conn.write(sb));
@@ -114,12 +114,12 @@ describe("wstunnel", () => {
     });
   });
 
-  it("test echo stream via http tunnel", function (done) {
+  it('test echo stream via http tunnel', function (done) {
     const { authenticate } = server;
     server.authenticate = (httpRequest, authCb) =>
       authenticate.call(server, httpRequest, function (err, { host, port }) {
-        if (!("x-htundir" in httpRequest.headers)) {
-          return authCb("reject websocket intentionally");
+        if (!('x-htundir' in httpRequest.headers)) {
+          return authCb('reject websocket intentionally');
         } else {
           return authCb(err, { host, port });
         }
@@ -134,7 +134,7 @@ describe("wstunnel", () => {
     });
   });
 
-  it("test end", function (done) {
+  it('test end', function (done) {
     done();
     return setTimeout(() => process.exit(0), 100);
   });

@@ -26,106 +26,123 @@ This allows the command to be used as ssh proxy:
  ssh -o ProxyCommand="wstunnel -c -t stdio:%h:%p https://wstserver" user@sshdestination
 Above command will ssh to "user@sshdestination" via the wstunnel server at "https://wstserver"
 
-`
+`;
 module.exports = (Server, Client) => {
-  const optimist = require('optimist')
+  const optimist = require('optimist');
   let argv = optimist
     .usage(Help)
-    .string("s")
-    .string("t")
-    .string("p")
-    .alias('p', "proxy")
-    .alias('t', "tunnel")
+    .string('s')
+    .string('t')
+    .string('p')
+    .alias('p', 'proxy')
+    .alias('t', 'tunnel')
     .boolean('c')
     .boolean('http')
     .string('uuid')
     .alias('c', 'anycert')
     .default('c', false)
     .describe('s', 'run as server, listen on [localip:]localport')
-    .describe('tunnel', 'run as tunnel client, specify [localip:]localport:host:port')
-    .describe("proxy", "connect via a http or socks proxy server in client mode ")
-    .describe("c", "accept any certificates")
-    .describe("http", "force to use http tunnel")
-    .argv;
+    .describe(
+      'tunnel',
+      'run as tunnel client, specify [localip:]localport:host:port'
+    )
+    .describe(
+      'proxy',
+      'connect via a http or socks proxy server in client mode '
+    )
+    .describe('c', 'accept any certificates')
+    .describe('http', 'force to use http tunnel').argv;
 
   if (argv.s) {
     let server;
     if (argv.t) {
-      let [host, port] = argv.t.split(":")
-      server = new Server(host, port)
+      let [host, port] = argv.t.split(':');
+      server = new Server(host, port);
     } else {
-      server = new Server()
+      server = new Server();
     }
-    server.start(argv.s, (err) => err ? console.log(` Server is listening on ${argv.s}`) : null)
+    server.start(argv.s, (err) =>
+      err ? console.log(` Server is listening on ${argv.s}`) : null
+    );
   } else if (argv.t || argv.uuid !== undefined) {
     // client mode
-    const uuid = require("machine-uuid");
+    const uuid = require('machine-uuid');
     uuid((machineId) => {
-      if (argv.uuid === true) { // --uuid without param
+      if (argv.uuid === true) {
+        // --uuid without param
         console.log(machineId);
         return;
-      } else if (argv.uuid){
+      } else if (argv.uuid) {
         machineId = argv.uuid;
       }
       if (argv.c) {
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
       }
-      let client = new Client()
-      let wsHostUrl = argv._[0]
-      
-      if ( argv.proxy ) {
-        const conf = urlParse(argv.proxy );
-        if (conf.protocol === "socks:") {
-          client.setAgentMaker((c) => new SocksProxyAgent(Object.assign({}, c, conf)));
-        } else if (conf.protocol === "https:" || conf.protocol === "http:") {
+      let client = new Client();
+      let wsHostUrl = argv._[0];
+
+      if (argv.proxy) {
+        const conf = urlParse(argv.proxy);
+        if (conf.protocol === 'socks:') {
+          client.setAgentMaker(
+            (c) => new SocksProxyAgent(Object.assign({}, c, conf))
+          );
+        } else if (conf.protocol === 'https:' || conf.protocol === 'http:') {
           const p = urlParse(wsHostUrl).protocol;
           if ('wss:' === p || 'https:' === p)
-            client.setAgentMaker((c) => new HttpsProxyAgent(Object.assign({}, c, conf)));
+            client.setAgentMaker(
+              (c) => new HttpsProxyAgent(Object.assign({}, c, conf))
+            );
           else if ('ws:' === p || 'http:' === p)
-            client.setAgentMaker((c) => new HttpProxyAgent(Object.assign({}, c, conf)));
+            client.setAgentMaker(
+              (c) => new HttpProxyAgent(Object.assign({}, c, conf))
+            );
           else {
-            console.log("Invalid target " + wsHostUrl);
-            process.exit(1);  
+            console.log('Invalid target ' + wsHostUrl);
+            process.exit(1);
           }
         } else {
-          console.log("Invalid proxy " + argv.proxy);
+          console.log('Invalid proxy ' + argv.proxy);
           process.exit(1);
         }
       }
       if (argv.http) {
-        client.setHttpOnly(true)
+        client.setHttpOnly(true);
       }
-      client.verbose()
+      client.verbose();
 
-      let localHost = "127.0.0.1", localPort;
+      let localHost = '127.0.0.1',
+        localPort;
       let remoteAddr;
-      let toks = argv.t.split(":")
+      let toks = argv.t.split(':');
       if (toks.length === 4) {
         [localHost, localPort] = toks;
-        remoteAddr = `${toks[2]}:${toks[3]}`
+        remoteAddr = `${toks[2]}:${toks[3]}`;
       } else if (toks.length === 3) {
-        remoteAddr = `${toks[1]}:${toks[2]}`
+        remoteAddr = `${toks[1]}:${toks[2]}`;
         if (toks[0] === 'stdio') {
           localHost = toks[0];
         } else {
           localPort = toks[0];
         }
       } else if (toks.length === 1) {
-        remoteAddr = "";
+        remoteAddr = '';
         localPort = toks[0];
       } else {
-        console.log("Invalid tunnel option " + argv.t);
+        console.log('Invalid tunnel option ' + argv.t);
         console.log(optimist.help());
         process.exit(1);
       }
       localPort = parseInt(localPort);
-      if (localHost === "stdio") {
-        client.startStdio(wsHostUrl, remoteAddr, {'x-wstclient': machineId});
+      if (localHost === 'stdio') {
+        client.startStdio(wsHostUrl, remoteAddr, { 'x-wstclient': machineId });
       } else {
-        client.start(localHost, localPort, wsHostUrl, remoteAddr, {'x-wstclient': machineId});
+        client.start(localHost, localPort, wsHostUrl, remoteAddr, {
+          'x-wstclient': machineId,
+        });
       }
-    })
+    });
   } else {
     console.log(optimist.help());
   }
-}
+};
