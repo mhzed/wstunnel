@@ -83,7 +83,7 @@ module.exports = (Server, Client) => {
 
       if (argv.proxy) {
         const conf = urlParse(argv.proxy);
-        if (conf.protocol === 'socks:') {
+        if (['socks4:', 'socks4a:', 'socks5:', 'socks:', 'socks5h:'].includes(conf.protocol)) {
           client.setAgentMaker(
             (c) => new SocksProxyAgent(Object.assign({}, c, conf))
           );
