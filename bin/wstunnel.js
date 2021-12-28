@@ -1,7 +1,6 @@
 const SocksProxyAgent = require('socks-proxy-agent');
 const HttpProxyAgent = require('http-proxy-agent');
 const HttpsProxyAgent = require('https-proxy-agent');
-var urlParse = require('url').parse;
 
 const Help = `
 Run websocket tunnel server or client.
@@ -82,13 +81,17 @@ module.exports = (Server, Client) => {
       let wsHostUrl = argv._[0];
 
       if (argv.proxy) {
-        const conf = urlParse(argv.proxy);
-        if (['socks4:', 'socks4a:', 'socks5:', 'socks:', 'socks5h:'].includes(conf.protocol)) {
+        const conf = new URL(argv.proxy);
+        if (
+          ['socks4:', 'socks4a:', 'socks5:', 'socks:', 'socks5h:'].includes(
+            conf.protocol
+          )
+        ) {
           client.setAgentMaker(
             (c) => new SocksProxyAgent(Object.assign({}, c, conf))
           );
         } else if (conf.protocol === 'https:' || conf.protocol === 'http:') {
-          const p = urlParse(wsHostUrl).protocol;
+          const p = new URL(wsHostUrl).protocol;
           if ('wss:' === p || 'https:' === p)
             client.setAgentMaker(
               (c) => new HttpsProxyAgent(Object.assign({}, c, conf))
@@ -111,7 +114,7 @@ module.exports = (Server, Client) => {
       }
       client.verbose();
 
-      let localHost = '127.0.0.1',
+      let localHost = 'localhost',
         localPort;
       let remoteAddr;
       let toks = argv.t.split(':');

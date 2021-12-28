@@ -2,10 +2,8 @@ const { spawn } = require('child_process');
 const path = require('path');
 const wst = require('../lib/wst');
 const net = require('net');
-const _log = require('lawg');
+const log = require('lawg');
 const assert = require('assert');
-
-const log = (msg) => _log(msg + '\n');
 
 const config = {
   s_port: 11001,
@@ -33,7 +31,6 @@ describe('wstunnel', () => {
     // setup ws server
     server.start(config.ws_port, function (err) {
       if (err) done(err);
-      log('ws server is setup');
       return client.start(
         'localhost',
         config.s_port,
@@ -42,7 +39,6 @@ describe('wstunnel', () => {
         {},
         function (err) {
           if (err) done(err);
-          log('tunnel is setup');
           done();
         }
       );
@@ -50,23 +46,31 @@ describe('wstunnel', () => {
 
   it('setup sock echo server', function (done) {
     const listener = (conn) => conn.on('data', (data) => conn.write(data));
+
     echo_server = net.createServer(listener);
-    return echo_server.listen(config.t_port, function () {
-      log('echo sock server is setup');
+    echo_server.listen(config.t_port, function () {
       done();
     });
   });
 
-  it('test echo', function (done) {
-    var conn = net.connect({ port: config.s_port }, () => conn.write('msg'));
-    return conn.on('data', function (data) {
+  it('test echo directly', function (done) {
+    var conn = net.connect({ port: config.t_port }, () => conn.write('msg'));
+    conn.on('data', function (data) {
       assert.equal(data, 'msg', 'echoed');
-      return done();
+      done();
+    });
+  });
+
+  it('test echo via wstunnel', function (done) {
+    var conn = net.connect({ port: config.s_port }, () => conn.write('msg'));
+    conn.on('data', function (data) {
+      assert.equal(data, 'msg', 'echoed');
+      done();
     });
   });
 
   const makeBuf = function (size) {
-    const b = new Buffer(size);
+    const b = Buffer.alloc(size);
     for (
       let i = 0, end = size / 4, asc = end >= 0;
       asc ? i < end : i > end;
@@ -91,7 +95,7 @@ describe('wstunnel', () => {
   };
 
   const recvEcho = function (conn, size, doneCb) {
-    const rb = new Buffer(size);
+    const rb = Buffer.alloc(size);
     let rbi = 0;
     conn.on('data', function (data) {
       data.copy(rb, rbi);

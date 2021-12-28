@@ -11,7 +11,7 @@ const config = {
   s_port: 19001,
   t_port: 22,
   ws_port: 19000,
-  host: '127.0.0.1',
+  host: 'localhost',
 };
 
 const server = new wst.server();
