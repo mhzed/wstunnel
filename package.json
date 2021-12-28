@@ -32,7 +32,7 @@
     "optimist": "0.3.5",
     "phuture": "^1.0.7",
     "socks-proxy-agent": "^4.0.1",
-    "underscore": "1.4.4",
+    "underscore": "1.12.1",
     "websocket": "^1.0.28"
   },
   "devDependencies": {
