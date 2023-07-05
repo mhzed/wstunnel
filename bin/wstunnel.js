@@ -33,6 +33,8 @@ module.exports = (Server, Client) => {
     .string('s')
     .string('t')
     .string('p')
+    .boolean('u')
+    .alias('u', 'udp')
     .alias('p', 'proxy')
     .alias('t', 'tunnel')
     .boolean('c')
@@ -52,11 +54,12 @@ module.exports = (Server, Client) => {
     .describe('c', 'accept any certificates')
     .describe('http', 'force to use http tunnel').argv;
 
+  const proto = argv.u ? 'udp' : 'tcp';
   if (argv.s) {
     let server;
     if (argv.t) {
       let [host, port] = argv.t.split(':');
-      server = new Server(host, port);
+      server = new Server({ host, port, proto });
     } else {
       server = new Server();
     }
@@ -123,11 +126,7 @@ module.exports = (Server, Client) => {
         remoteAddr = `${toks[2]}:${toks[3]}`;
       } else if (toks.length === 3) {
         remoteAddr = `${toks[1]}:${toks[2]}`;
-        if (toks[0] === 'stdio') {
-          localHost = toks[0];
-        } else {
-          localPort = toks[0];
-        }
+        localPort = toks[0];
       } else if (toks.length === 1) {
         remoteAddr = '';
         localPort = toks[0];
@@ -136,11 +135,10 @@ module.exports = (Server, Client) => {
         console.log(optimist.help());
         process.exit(1);
       }
-      localPort = parseInt(localPort);
-      if (localHost === 'stdio') {
-        client.startStdio(wsHostUrl, remoteAddr, { 'x-wstclient': machineId });
+      if (localPort === 'stdio') {
+        client.startStdio({ wsHostUrl, remoteAddr, proto }, { 'x-wstclient': machineId });
       } else {
-        client.start(localHost, localPort, wsHostUrl, remoteAddr, {
+        client.start({ localHost, localPort: parseInt(localPort), wsHostUrl, remoteAddr, proto }, {
           'x-wstclient': machineId,
         });
       }
