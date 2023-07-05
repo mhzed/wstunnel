@@ -30,6 +30,19 @@ To tell client to connect via http proxy, do:
 
     wstunnel -t 33:2.2.2.2:33 -p http://[user:pass@]proxyhost:proxyport wss://server:443
 
+To pass the UDP traffic instead of TCP use '-u' option for the client or for the server:
+
+    Client:
+        wstunnel -u -t 33:2.2.2.2:33 ws://host:8080
+    
+    or
+
+    Client:
+        wstunnel -u -t 33 ws://server:8080
+
+    Server:
+        wstunnel -s 0.0.0.0:8080 -u -t 2.2.2.2:33
+
 For dev/test purpose, client can set '-c' option to disable ssl certificate check.
 
 This also makes you vulnerable to MITM attack, so use with caution.

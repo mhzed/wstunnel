@@ -2,6 +2,7 @@ const { spawn } = require('child_process');
 const path = require('path');
 const wst = require('../lib/wst');
 const net = require('net');
+const dgram = require('dgram');
 const log = require('lawg');
 const assert = require('assert');
 
@@ -31,11 +32,12 @@ describe('wstunnel', () => {
     // setup ws server
     server.start(config.ws_port, function (err) {
       if (err) done(err);
-      return client.start(
-        'localhost',
-        config.s_port,
-        `ws://localhost:${config.ws_port}`,
-        `localhost:${config.t_port}`,
+      return client.start({
+          localHost: 'localhost',
+          localPort: config.s_port,
+          wsHostUrl: `ws://localhost:${config.ws_port}`,
+          remoteAddr: `localhost:${config.t_port}`,
+        },
         {},
         function (err) {
           if (err) done(err);
@@ -69,14 +71,15 @@ describe('wstunnel', () => {
     });
   });
 
-  const makeBuf = function (size) {
+  const makeBuf = function (size, seed) {
+    seed = seed || 0;
     const b = Buffer.alloc(size);
     for (
       let i = 0, end = size / 4, asc = end >= 0;
       asc ? i < end : i > end;
       asc ? i++ : i--
     ) {
-      b.writeInt32LE(i + 1, i * 4);
+      b.writeInt32LE(i + 1 + seed, i * 4);
     }
     return b;
   };
@@ -121,11 +124,11 @@ describe('wstunnel', () => {
   it('test echo stream via http tunnel', function (done) {
     const { authenticate } = server;
     server.authenticate = (httpRequest, authCb) =>
-      authenticate.call(server, httpRequest, function (err, { host, port }) {
+      authenticate.call(server, httpRequest, function (err, { host, port, proto }) {
         if (!('x-htundir' in httpRequest.headers)) {
           return authCb('reject websocket intentionally');
         } else {
-          return authCb(err, { host, port });
+          return authCb(err, { host, port, proto });
         }
       });
 
@@ -136,6 +139,77 @@ describe('wstunnel', () => {
       assert.ok(isSameBuf(sb, rb));
       return done();
     });
+  });
+
+  it('setup udp echo server', function (done) {
+    echo_server.close();
+    echo_server = dgram.createSocket('udp4');
+    echo_server.on('message', (data, rinfo) => {
+      echo_server.send(data, rinfo.port, rinfo.address);
+    });
+    echo_server.bind(config.t_port, () => done());
+  });
+
+  it('setup udp tunnel', (done) => {
+    const client = new wst.client();
+    client.start({
+      localHost: '127.0.0.1', // only ipv4
+      localPort: config.s_port,
+      wsHostUrl: `ws://localhost:${config.ws_port}`,
+      remoteAddr: `127.0.0.1:${config.t_port}`,
+      proto: 'udp',
+    },
+    {},
+    function (err) {
+      if (err) done(err);
+      done();
+    });
+  });
+
+  function recvUdpEcho(host, port, sendData, doneCb) {
+    const size = sendData.length;
+    const rb = Buffer.alloc(size);
+    let rbi = 0;
+    const chunk = 1024;
+    const socket = dgram.createSocket('udp4');
+    socket.on('message', (data, rinfo) => {
+      assert.equal(host, rinfo.address);
+      assert.equal(port, rinfo.port);
+      data.copy(rb, rbi);
+      rbi += data.length;
+      if (rbi >= size) {
+        assert.equal(isSameBuf(rb, sendData), true);
+        doneCb();
+      } else {
+        socket.send(sendData, rbi, Math.min(chunk, size - rbi), port, host);
+      }
+    });
+    socket.send(sendData, 0, Math.min(chunk, size), port, host);
+  }
+
+  it('test udp echo', (done) => {
+    const data = makeBuf(987648);
+    recvUdpEcho('127.0.0.1', config.t_port, data, done);
+  });
+
+  it('test udp tunnel', (done) => {
+    const data = makeBuf(987648);
+    recvUdpEcho('127.0.0.1', config.s_port, data, done);
+  });
+
+  it('test multiple udp tunnels', (done) => {
+    Promise.all([
+      new Promise((resolve) => {
+        const data = makeBuf(987648, 1);
+        recvUdpEcho('127.0.0.1', config.s_port, data, resolve);
+      }),
+      new Promise((resolve) => {
+        const data = makeBuf(987648, 2);
+        recvUdpEcho('127.0.0.1', config.s_port, data, resolve);
+      }),
+    ])
+    .then(() => done())
+    .catch(e => done(e));
   });
 
   it('test end', function (done) {
